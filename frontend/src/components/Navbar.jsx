@@ -11,16 +11,19 @@ const Navbar = () => {
           <img src={logo} alt="CBR Soloraya" className="h-12 w-auto" />
           <div className="hidden md:block">
             <h1 className="font-bold text-lg leading-none">CBR SOLORAYA</h1>
-            <p className="text-[10px] text-yellow-600 font-semibold tracking-tighter uppercase">Kamp Bebas Riba</p>
+            <p className="text-[10px] text-yellow-600 font-semibold tracking-tighter uppercase">Camp Bebas Riba</p>
           </div>
         </Link>
 
-        {/* Menu Section */}
+        {/*Menu Section*/}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to="/" className="hover:text-yellow-600 transition">Beranda</Link>
-          <Link to="/tentang" className="hover:text-yellow-600 transition">Tentang</Link>
-          <Link to="/kegiatan" className="hover:text-yellow-600 transition">Kegiatan</Link>
-          <Link to="/galeri" className="hover:text-yellow-600 transition">Galeri</Link>
+          <Link to="/" className="hover:text-yellow-600 transition">Surakarta</Link>
+          <Link to="/Boyolali" className="hover:text-yellow-600 transition">Boyolali</Link>
+          <Link to="/Klaten" className="hover:text-yellow-600 transition">Klaten</Link>
+          <Link to="/Karanganyar" className="hover:text-yellow-600 transition">Karanganyar</Link>
+          <Link to="/Sragen" className="hover:text-yellow-600 transition">Sragen</Link>
+          <Link to="/Sukoharjo" className="hover:text-yellow-600 transition">Sukoharjo</Link>
+          <Link to="/Wonogiri" className="hover:text-yellow-600 transition">Wonogiri</Link>
         </div>
 
         {/* Action Buttons */}
