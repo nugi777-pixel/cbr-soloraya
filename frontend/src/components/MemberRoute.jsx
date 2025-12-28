@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-export default function AdminRoute({ children }) {
+export default function MemberRoute({ children }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
@@ -8,7 +8,7 @@ export default function AdminRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (role !== "admin") {
+  if (role !== "member") {
     return <Navigate to="/login" replace />;
   }
 
