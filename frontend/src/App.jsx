@@ -13,6 +13,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import MemberDashboard from "./pages/member/MemberDashboard";
 
 import SmartRedirect from "./components/SmartRedirect";
+import AuditLog from "./pages/admin/AuditLog";
+
 
 function App() {
   return (
@@ -52,7 +54,17 @@ function App() {
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
 
+      <Route
+        path="/admin/audit-log"
+        element={
+          <AdminRoute>
+            <AuditLog />
+          </AdminRoute>
+        }
+      />
+
     </Routes>
+    
   );
 }
 
