@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import authRoutes from "./api/auth.js";
 import adminRoutes from "./api/admin.js";
 
+
+
 dotenv.config();
 
 const app = express(); // ⬅️ INI YANG TADI HILANG
@@ -20,6 +22,8 @@ app.use(express.json());
    ROUTES
 ======================= */
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+
 app.use("/api/admin", adminRoutes);
 
 /* =======================

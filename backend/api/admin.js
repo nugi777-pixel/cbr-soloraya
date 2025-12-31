@@ -1,14 +1,17 @@
 import express from "express";
 import User from "../models/User.js";
+import AuditLog from "../models/AuditLog.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 import { logAdminAction } from "../utils/auditLogger.js";
 
 const router = express.Router();
 
-// semua route ini membutuhkan admin
+// semua route admin wajib auth + role
 router.use(requireAuth, requireAdmin);
 
-// GET /api/admin/users  -> list semua user (exclude password)
+/* ===================== USERS ===================== */
+
+// GET /api/admin/users
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find()
@@ -20,6 +23,79 @@ router.get("/users", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// PATCH /api/admin/users/:id
+router.patch("/users/:id", async (req, res) => {
+  try {
+    const target = await User.findById(req.params.id);
+    if (!target)
+      return res.status(404).json({ message: "User tidak ditemukan" });
+
+    if (target.role === "superadmin")
+      return res.status(403).json({ message: "Superadmin tidak bisa diubah" });
+
+    if (req.user.role === "admin" && target.role === "admin")
+      return res
+        .status(403)
+        .json({ message: "Admin tidak boleh mengubah admin lain" });
+
+    const updates = {};
+    if (req.body.role) updates.role = req.body.role;
+    if (typeof req.body.active === "boolean")
+      updates.active = req.body.active;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true }
+    ).select("-password");
+
+    await logAdminAction({
+      req,
+      action: "UPDATE_USER",
+      targetUser: target._id,
+      detail: `Update role/status user ${target.email}`,
+    });
+
+    res.json({ message: "User diperbarui", user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/admin/users/:id
+router.delete("/users/:id", async (req, res) => {
+  try {
+    const target = await User.findById(req.params.id);
+    if (!target)
+      return res.status(404).json({ message: "User tidak ditemukan" });
+
+    if (target.role === "superadmin")
+      return res
+        .status(403)
+        .json({ message: "Superadmin tidak bisa dihapus" });
+
+    if (req.user.role === "admin" && target.role === "admin")
+      return res
+        .status(403)
+        .json({ message: "Admin tidak boleh menghapus admin lain" });
+
+    await target.deleteOne();
+
+    await logAdminAction({
+      req,
+      action: "DELETE_USER",
+      targetUser: target._id,
+      detail: `Hapus user ${target.email}`,
+    });
+
+    res.json({ message: "User dihapus" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* ===================== STATS ===================== */
 
 // GET /api/admin/stats
 router.get("/stats", async (req, res) => {
@@ -44,83 +120,21 @@ router.get("/stats", async (req, res) => {
   }
 });
 
+/* ===================== AUDIT LOG ===================== */
 
-// PATCH role / active
-router.patch("/users/:id", async (req, res) => {
+// GET /api/admin/audit-log
+router.get("/audit-log", async (req, res) => {
   try {
-    const target = await User.findById(req.params.id);
-    if (!target)
-      return res.status(404).json({ message: "User tidak ditemukan" });
+    const logs = await AuditLog.find()
+      .populate("admin", "email role")
+      .populate("targetUser", "email role")
+      .sort({ createdAt: -1 })
+      .limit(100);
 
-    // ❌ tidak boleh mengubah superadmin
-    if (target.role === "superadmin") {
-      return res
-        .status(403)
-        .json({ message: "Superadmin tidak bisa diubah" });
-    }
-
-    // ❌ admin tidak boleh ubah admin lain
-    if (req.user.role === "admin" && target.role === "admin") {
-      return res
-        .status(403)
-        .json({ message: "Admin tidak boleh mengubah admin lain" });
-    }
-
-    const updates = {};
-    if (req.body.role) updates.role = req.body.role;
-    if (typeof req.body.active === "boolean")
-      updates.active = req.body.active;
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      updates,
-      { new: true }
-    ).select("-password");
-
-    res.json({ message: "User diperbarui", user });
+    res.json({ logs });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-
-  await logAdminAction({
-  req,
-  action: "UPDATE_USER",
-  targetUser: target._id,
-  detail: `Update role/status user ${target.email}`,
 });
 
-// DELETE
-router.delete("/users/:id", async (req, res) => {
-  try {
-    const target = await User.findById(req.params.id);
-    if (!target)
-      return res.status(404).json({ message: "User tidak ditemukan" });
-
-    // ❌ tidak boleh hapus superadmin
-    if (target.role === "superadmin") {
-      return res
-        .status(403)
-        .json({ message: "Superadmin tidak bisa dihapus" });
-    }
-
-    // ❌ admin tidak boleh hapus admin lain
-    if (req.user.role === "admin" && target.role === "admin") {
-      return res
-        .status(403)
-        .json({ message: "Admin tidak boleh menghapus admin lain" });
-    }
-
-    await target.deleteOne();
-    res.json({ message: "User dihapus" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-
-  await logAdminAction({
-  req,
-  action: "DELETE_USER",
-  targetUser: target._id,
-  detail: `Hapus user ${target.email}`,
-});
-
-export default router; 
+export default router;

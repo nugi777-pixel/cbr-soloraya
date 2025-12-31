@@ -7,18 +7,14 @@ const auditLogSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    action: {
-      type: String,
-      required: true, // contoh: "DELETE_USER", "UPDATE_ROLE"
-    },
+    action: { type: String, required: true },
     targetUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    detail: {
-      type: String,
-    },
+    detail: String,
     ip: String,
+    userAgent: String,
   },
   { timestamps: true }
 );

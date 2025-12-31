@@ -13,6 +13,7 @@ export const logAdminAction = async ({
       targetUser,
       detail,
       ip: req.ip,
+      userAgent: req.headers["user-agent"],
     });
   } catch (err) {
     console.error("Audit log error:", err.message);

@@ -1,3 +1,4 @@
+// middleware/auth.js
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
@@ -17,7 +18,8 @@ export async function requireAuth(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (req.user.role !== "admin") {
+  // Superadmin juga bisa akses
+  if (req.user.role !== "admin" && req.user.role !== "superadmin") {
     return res.status(403).json({ message: "Akses admin saja" });
   }
   next();

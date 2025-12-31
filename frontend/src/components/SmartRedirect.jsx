@@ -2,12 +2,15 @@ import { Navigate } from "react-router-dom";
 
 export default function SmartRedirect() {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
-  if (role === "member") return <Navigate to="/member/dashboard" replace />;
-  if (role === "admin") return <Navigate to="/admin/dashboard" replace />;
+  if (user.role === "admin" || user.role === "superadmin") {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
-  return <Navigate to="/login" replace />;
+  return <Navigate to="/member/dashboard" replace />;
 }

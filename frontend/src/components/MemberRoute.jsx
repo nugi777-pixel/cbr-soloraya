@@ -2,14 +2,12 @@ import { Navigate } from "react-router-dom";
 
 export default function MemberRoute({ children }) {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!token) return <Navigate to="/login" replace />;
 
-  if (role !== "member") {
-    return <Navigate to="/login" replace />;
+  if (user?.role !== "member") {
+    return <Navigate to="/" replace />;
   }
 
   return children;

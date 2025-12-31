@@ -1,37 +1,78 @@
 import { NavLink } from "react-router-dom";
-
-const menus = [
-  { name: "Dashboard", path: "/admin" },
-  { name: "Profil", path: "/admin/profil" },
-  { name: "Kegiatan", path: "/admin/kegiatan" },
-  { name: "Member", path: "/admin/members" },
-  { name: "User", path: "/admin/users" },
-];
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  BarChart3,
+  LogOut,
+} from "lucide-react";
 
 export default function Sidebar() {
+  const menu = [
+    {
+      label: "Dashboard",
+      to: "/admin/dashboard",
+      icon: <LayoutDashboard size={18} />,
+    },
+    {
+      label: "Statistik",
+      to: "/admin/stats",
+      icon: <BarChart3 size={18} />,
+    },
+    {
+      label: "Manajemen User",
+      to: "/admin/users",
+      icon: <Users size={18} />,
+    },
+    {
+      label: "Audit Log",
+      to: "/admin/audit-log",
+      icon: <FileText size={18} />,
+    },
+  ];
+
+  const logout = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
+
   return (
-    <aside className="w-64 bg-gray-900 text-gray-100 min-h-screen">
-      <div className="px-6 py-4 text-xl font-bold border-b border-gray-700">
-        Admin CBR
+    <aside className="w-64 bg-white border-r min-h-screen flex flex-col">
+      {/* HEADER */}
+      <div className="h-16 flex items-center px-6 border-b font-bold text-lg">
+        CBR Admin
       </div>
 
-      <nav className="p-4 space-y-2">
-        {menus.map((menu) => (
+      {/* MENU */}
+      <nav className="flex-1 px-4 py-6 space-y-1">
+        {menu.map((item) => (
           <NavLink
-            key={menu.path}
-            to={menu.path}
+            key={item.to}
+            to={item.to}
+            end
             className={({ isActive }) =>
-              `block px-4 py-2 rounded text-sm ${
+              `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
+              ${
                 isActive
-                  ? "bg-red-600 text-white"
-                  : "hover:bg-gray-800"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
               }`
             }
           >
-            {menu.name}
+            {item.icon}
+            {item.label}
           </NavLink>
         ))}
       </nav>
+
+      {/* LOGOUT */}
+      <button
+        onClick={logout}
+        className="flex items-center gap-3 px-6 py-4 border-t text-sm text-red-600 hover:bg-red-50"
+      >
+        <LogOut size={18} />
+        Logout
+      </button>
     </aside>
   );
 }
