@@ -1,21 +1,26 @@
 import AuditLog from "../models/AuditLog.js";
 
-export const logAdminAction = async ({
-  req,
+const auditLogger = async ({
+  user,
   action,
-  targetUser,
-  detail,
+  req,
+  detail = "",
 }) => {
   try {
     await AuditLog.create({
-      admin: req.user.id,
+      userId: user?.id || null,
+      email: user?.email || null,
+      role: user?.role || null,
       action,
-      targetUser,
-      detail,
-      ip: req.ip,
+      ipAddress:
+        req.headers["x-forwarded-for"] ||
+        req.socket.remoteAddress,
       userAgent: req.headers["user-agent"],
+      detail,
     });
   } catch (err) {
-    console.error("Audit log error:", err.message);
+    console.error("Audit log gagal:", err.message);
   }
 };
+
+export default auditLogger;

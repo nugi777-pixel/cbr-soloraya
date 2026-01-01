@@ -2,19 +2,29 @@ import mongoose from "mongoose";
 
 const auditLogSchema = new mongoose.Schema(
   {
-    admin: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: false,
+    },
+    email: String,
+    role: String,
+
+    action: {
+      type: String,
       required: true,
+      enum: [
+        "LOGIN_SUCCESS",
+        "LOGIN_FAILED",
+        "LOGOUT",
+        "CHANGE_PASSWORD",
+        "FORCE_PASSWORD_CHANGE",
+      ],
     },
-    action: { type: String, required: true },
-    targetUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    detail: String,
-    ip: String,
+
+    ipAddress: String,
     userAgent: String,
+    detail: String,
   },
   { timestamps: true }
 );

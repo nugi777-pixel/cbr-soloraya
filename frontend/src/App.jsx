@@ -17,6 +17,9 @@ import AuditLog from "./pages/admin/AuditLog";
 import MemberDashboard from "./pages/member/MemberDashboard";
 import SmartRedirect from "./components/SmartRedirect";
 
+import UbahPassword from "./pages/UbahPassword";
+
+
 function App() {
   return (
     <Routes>
@@ -58,6 +61,16 @@ function App() {
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
+
+      <Route
+      path="/ubah-password"
+      element={
+        <MemberRoute>
+          <UbahPassword />
+        </MemberRoute>
+      }
+    />
+
     </Routes>
   );
 }
