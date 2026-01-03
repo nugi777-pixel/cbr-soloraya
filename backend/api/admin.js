@@ -2,7 +2,9 @@ import express from "express";
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
-import { logAdminAction } from "../utils/auditLogger.js";
+
+import auditLogger from "../utils/auditLogger.js";
+
 
 const router = express.Router();
 
@@ -50,12 +52,13 @@ router.patch("/users/:id", async (req, res) => {
       { new: true }
     ).select("-password");
 
-    await logAdminAction({
-      req,
-      action: "UPDATE_USER",
-      targetUser: target._id,
-      detail: `Update role/status user ${target.email}`,
-    });
+    await auditLogger({
+  user: req.user,
+  action: "ADMIN_ACTION",
+  req,
+  detail: "Admin membuka audit log",
+});
+
 
     res.json({ message: "User diperbarui", user });
   } catch (err) {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,21 +15,21 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:4100/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await api.post("/api/auth/login", { email, password });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login gagal");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      navigate("/member/dashboard");
+      if (
+        res.data.user.role === "admin" ||
+        res.data.user.role === "superadmin"
+      ) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/member/dashboard");
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Login gagal");
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md border border-gray-200 w-full max-w-sm"
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
       >
         <h1 className="text-2xl font-bold mb-4 text-center text-blue-800">
           Login CBR Soloraya
@@ -53,39 +54,30 @@ export default function Login() {
         <input
           type="email"
           placeholder="Email"
+          className="w-full mb-3 p-2 border rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-3 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
           required
         />
 
         <input
           type="password"
           placeholder="Password"
+          className="w-full mb-4 p-2 border rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded text-white font-semibold transition ${
-            loading
-              ? "bg-gray-400"
-              : "bg-blue-800 hover:bg-blue-700"
+          className={`w-full py-2 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-blue-800 hover:bg-blue-700"
           }`}
         >
           {loading ? "Memproses..." : "Login"}
         </button>
-
-        <p className="text-sm text-gray-500 mt-3 text-center">
-          Belum punya akun?{" "}
-          <a href="/daftar" className="text-blue-800 hover:underline">
-            Daftar
-          </a>
-        </p>
       </form>
     </div>
   );

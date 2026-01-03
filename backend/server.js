@@ -6,11 +6,9 @@ import dotenv from "dotenv";
 import authRoutes from "./api/auth.js";
 import adminRoutes from "./api/admin.js";
 
-
-
 dotenv.config();
 
-const app = express(); // ⬅️ INI YANG TADI HILANG
+const app = express();
 
 /* =======================
    MIDDLEWARE
@@ -24,7 +22,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
-app.use("/api/admin", adminRoutes);
+app.get("/", (req, res) => {
+  res.send("CBR Soloraya API running");
+});
 
 /* =======================
    DATABASE
