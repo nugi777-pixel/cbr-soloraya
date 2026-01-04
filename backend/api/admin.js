@@ -3,17 +3,29 @@ import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
-import auditLogger from "../utils/auditLogger.js";
+import {
+  getPendingMembers,
+  approveMember,
+  rejectMember
+} from "../controllers/adminController.js";
 
+
+import auditLogger from "../utils/auditLogger.js";
 
 const router = express.Router();
 
-// semua route admin wajib auth + role
+/* ===================== PROTECT ALL ADMIN ROUTES ===================== */
 router.use(requireAuth, requireAdmin);
+
+/* ===================== MEMBER APPROVAL ===================== */
+
+router.get("/members/pending", getPendingMembers);
+
+router.post("/members/:id/approve", approveMember);
+router.post("/members/:id/reject", rejectMember);
 
 /* ===================== USERS ===================== */
 
-// GET /api/admin/users
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find()
@@ -26,7 +38,6 @@ router.get("/users", async (req, res) => {
   }
 });
 
-// PATCH /api/admin/users/:id
 router.patch("/users/:id", async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
@@ -53,12 +64,11 @@ router.patch("/users/:id", async (req, res) => {
     ).select("-password");
 
     await auditLogger({
-  user: req.user,
-  action: "ADMIN_ACTION",
-  req,
-  detail: "Admin membuka audit log",
-});
-
+      user: req.user,
+      action: "UPDATE_USER",
+      req,
+      detail: `Update user ${target.email}`,
+    });
 
     res.json({ message: "User diperbarui", user });
   } catch (err) {
@@ -66,7 +76,6 @@ router.patch("/users/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/admin/users/:id
 router.delete("/users/:id", async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
@@ -85,10 +94,10 @@ router.delete("/users/:id", async (req, res) => {
 
     await target.deleteOne();
 
-    await logAdminAction({
-      req,
+    await auditLogger({
+      user: req.user,
       action: "DELETE_USER",
-      targetUser: target._id,
+      req,
       detail: `Hapus user ${target.email}`,
     });
 
@@ -100,7 +109,6 @@ router.delete("/users/:id", async (req, res) => {
 
 /* ===================== STATS ===================== */
 
-// GET /api/admin/stats
 router.get("/stats", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -125,7 +133,6 @@ router.get("/stats", async (req, res) => {
 
 /* ===================== AUDIT LOG ===================== */
 
-// GET /api/admin/audit-log
 router.get("/audit-log", async (req, res) => {
   try {
     const logs = await AuditLog.find()

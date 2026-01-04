@@ -1,78 +1,27 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/Login";
-import Daftar from "./pages/Daftar";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 
-import AdminRoute from "./components/AdminRoute";
-import MemberRoute from "./components/MemberRoute";
-
-import AdminLayout from "./layouts/AdminLayout";
-import MemberLayout from "./layouts/MemberLayout";
+import DashboardMember from "./pages/member/DashboardMember";
+import UpgradeMember from "./pages/member/UpgradeMember";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import DashboardStats from "./pages/admin/DashboardStats";
-import Users from "./pages/admin/Users";
-import AuditLog from "./pages/admin/AuditLog";
 
-import MemberDashboard from "./pages/member/MemberDashboard";
-import SmartRedirect from "./components/SmartRedirect";
-
-import UbahPassword from "./pages/UbahPassword";
-
-
-function App() {
+export default function App() {
   return (
-    <Routes>
-      {/* ROOT */}
-      <Route path="/" element={<SmartRedirect />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* AUTH */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/daftar" element={<Daftar />} />
+        <Route path="/member/dashboard" element={<DashboardMember />} />
+        <Route path="/member/upgrade" element={<UpgradeMember />} />
 
-      {/* ADMIN */}
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminLayout />
-          </AdminRoute>
-        }
-      >
-        <Route index element={<AdminDashboard />} /> {/* default /admin */}
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="stats" element={<DashboardStats />} />
-        <Route path="users" element={<Users />} />
-        <Route path="audit-log" element={<AuditLog />} />
-      </Route>
+        <Route path="/dashboard/admin" element={<AdminDashboard />} />
 
-      {/* MEMBER */}
-      <Route
-        path="/member"
-        element={
-          <MemberRoute>
-            <MemberLayout />
-          </MemberRoute>
-        }
-      >
-        <Route index element={<MemberDashboard />} />
-        <Route path="dashboard" element={<MemberDashboard />} />
-      </Route>
-
-      {/* FALLBACK */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-
-      <Route
-      path="/ubah-password"
-      element={
-        <MemberRoute>
-          <UbahPassword />
-        </MemberRoute>
-      }
-    />
-
-    </Routes>
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;

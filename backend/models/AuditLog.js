@@ -14,12 +14,16 @@ const auditLogSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "LOGIN_SUCCESS",
+        "LOGIN",
         "LOGIN_FAILED",
         "LOGOUT",
         "CHANGE_PASSWORD",
-        "FORCE_PASSWORD_CHANGE",
-      ],
+        "ADMIN_ACTION",
+        "DELETE_USER",
+        "APPROVE_MEMBER",
+        "REJECT_MEMBER"
+        ],
+
     },
 
     ipAddress: String,

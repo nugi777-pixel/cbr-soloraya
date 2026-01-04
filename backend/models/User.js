@@ -1,71 +1,44 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    password: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
 
     role: {
       type: String,
-      enum: ["superadmin", "admin", "member"],
+      enum: ["member", "admin"],
       default: "member",
     },
 
-    // 🔒 FLAG PASSWORD LAMA (UNTUK MIGRASI)
-    passwordLegacy: {
-      type: Boolean,
-      default: true, // user lama = true
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    lastLoginAt: {
-      type: Date,
+    memberNumber: {
+      type: String,
       default: null,
     },
+
+    status: {
+      type: String,
+      enum: ["pending", "waiting_review", "approved", "rejected"],
+      default: "pending",
+    },      
+    
+    upgradeRequest: {
+      fullName: String,
+      phone: String,
+      address: String,
+      occupation: String,
+      reason: String,
+      submittedAt: Date,
+    },
+
+    rejectReason: {
+      type: String,
+      default: null,
+    },
+
   },
-  {
-    timestamps: true, // createdAt & updatedAt
-  }
+  { timestamps: true }
 );
-
-//
-// 🔐 HASH PASSWORD SEBELUM SAVE
-//
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-
-  next();
-});
-
-//
-// 🔍 COMPARE PASSWORD
-//
-userSchema.methods.comparePassword = function (inputPassword) {
-  return bcrypt.compare(inputPassword, this.password);
-};
 
 export default mongoose.model("User", userSchema);

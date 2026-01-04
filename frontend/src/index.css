@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* global body style */
+body {
+  @apply bg-slate-100 text-slate-800;
+}
+
+/* reusable input */
+.input {
+  @apply w-full border border-slate-300 rounded-lg px-4 py-3
+  focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+/* file input */
+.input-file {
+  @apply w-full border border-slate-300 rounded-lg px-4 py-2 bg-white;
+}
+
+/* primary button */
+.btn-primary {
+  @apply bg-accent text-white px-6 py-3 rounded-lg
+  hover:bg-blue-700 transition font-medium;
+}

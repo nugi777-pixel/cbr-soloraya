@@ -1,44 +1,26 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
-
 import authRoutes from "./api/auth.js";
 import adminRoutes from "./api/admin.js";
+import memberRoutes from "./api/member.js";
 
 dotenv.config();
 
 const app = express();
-
-/* =======================
-   MIDDLEWARE
-======================= */
 app.use(cors());
 app.use(express.json());
 
-/* =======================
-   ROUTES
-======================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/member", memberRoutes);
 
-app.get("/", (req, res) => {
-  res.send("CBR Soloraya API running");
-});
-
-/* =======================
-   DATABASE
-======================= */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error(err));
+  .catch(err => console.error(err));
 
-/* =======================
-   SERVER
-======================= */
-const PORT = process.env.PORT || 4100;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(4100, () => {
+  console.log("Server running on port 4100");
 });

@@ -1,70 +1,116 @@
-import { Link } from "react-router-dom";
-
-// Fungsi download Excel
-const exportExcel = async () => {
-  const token = localStorage.getItem("token");
-
-  try {
-    const res = await fetch("http://localhost:4100/api/admin/users/export", {
-      headers: { Authorization: "Bearer " + token },
-    });
-
-    if (!res.ok) throw new Error("Gagal mengunduh file");
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "users.xlsx"; // nama file
-    document.body.appendChild(a);
-    a.click();
-
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert("Gagal mengunduh file Excel");
-  }
-};
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
+  const [members, setMembers] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [memberNumber, setMemberNumber] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+
+  const token = JSON.parse(localStorage.getItem("user"))?.token;
+
+  useEffect(() => {
+    fetch("http://localhost:4100/api/admin/members/pending", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => setMembers(data.members));
+  }, []);
+
+  const approve = async id => {
+    const res = await fetch(
+      `http://localhost:4100/api/admin/members/${id}/approve`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ memberNumber }),
+      }
+    );
+
+    if (res.ok) {
+      alert("Member disetujui");
+      setMembers(members.filter(m => m._id !== id));
+      setMemberNumber("");
+    }
+  };
+
+  const reject = async id => {
+    const res = await fetch(
+      `http://localhost:4100/api/admin/members/${id}/reject`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reason: rejectReason }),
+      }
+    );
+
+    if (res.ok) {
+      alert("Member ditolak");
+      setMembers(members.filter(m => m._id !== id));
+      setRejectReason("");
+    }
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-6">Admin Review Member</h1>
 
-      
+      {members.length === 0 && (
+        <p className="text-gray-600">Tidak ada pengajuan upgrade</p>
+      )}
 
-      {/* Dashboard Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <DashboardCard
-          title="Statistik"
-          desc="Lihat grafik & ringkasan data"
-          to="/admin/stats"
-        />
-        <DashboardCard
-          title="Manajemen User"
-          desc="Kelola member & admin"
-          to="/admin/users"
-        />
-        <DashboardCard
-          title="Audit Log"
-          desc="Riwayat aktivitas admin"
-          to="/admin/audit-log"
-        />
-      </div>
+      {members.map(m => (
+        <div
+          key={m._id}
+          className="border rounded p-4 mb-4 bg-white shadow"
+        >
+          <h2 className="font-semibold text-lg">{m.upgradeRequest?.fullName}</h2>
+          <p>Email: {m.email}</p>
+          <p>HP: {m.upgradeRequest?.phone}</p>
+          <p>Pekerjaan: {m.upgradeRequest?.occupation}</p>
+          <p>Alamat: {m.upgradeRequest?.address}</p>
+          <p className="italic text-gray-600 mt-2">
+            "{m.upgradeRequest?.reason}"
+          </p>
+
+          {/* APPROVE */}
+          <div className="mt-4">
+            <input
+              placeholder="Member Number"
+              value={memberNumber}
+              onChange={e => setMemberNumber(e.target.value)}
+              className="border px-2 py-1 mr-2"
+            />
+            <button
+              onClick={() => approve(m._id)}
+              className="bg-green-600 text-white px-3 py-1 rounded"
+            >
+              Approve
+            </button>
+          </div>
+
+          {/* REJECT */}
+          <div className="mt-3">
+            <input
+              placeholder="Alasan penolakan"
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              className="border px-2 py-1 mr-2 w-64"
+            />
+            <button
+              onClick={() => reject(m._id)}
+              className="bg-red-600 text-white px-3 py-1 rounded"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
-  );
-}
-
-function DashboardCard({ title, desc, to }) {
-  return (
-    <Link
-      to={to || "#"} // fallback jika `to` kosong
-      className="bg-white shadow rounded-xl p-6 hover:ring-2 ring-blue-500 transition"
-    >
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="text-gray-500 mt-2">{desc}</p>
-    </Link>
   );
 }
